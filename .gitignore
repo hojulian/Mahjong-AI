@@ -1,0 +1,9 @@
+data
+logs
+*.logs
+*.pyc
+output
+wandb
+node_modules
+.DS_Store
+model/saved

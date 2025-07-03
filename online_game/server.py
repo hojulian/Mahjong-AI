@@ -87,7 +87,7 @@ class Client(object):
 
 class GameEnvironment(object):
 
-    def __init__(self, has_aka=True, AI_count=0, min_score=0, fast=False, allow_observe=True, train=False):
+    def __init__(self, has_aka=True, AI_count=0, min_score=0, fast=False, allow_observe=True, train=False, suggest=False):
         self.game = MahjongGame(has_aka, is_playback=False)
         self.agents = self.game.agents
         self.round = 0
@@ -110,6 +110,7 @@ class GameEnvironment(object):
         self.fast = fast
         self.allow_observe = allow_observe
         self.train = train
+        self.suggest = suggest
         if train:
             self.device = torch.device('cuda') if torch.cuda.is_available() else torch.device('cpu')
             params = torch.load('model/saved/reward-model/best.pt', map_location=self.device)
@@ -398,6 +399,14 @@ class GameEnvironment(object):
         if self.train:
             self.collected_data[who].append([state, discard // 4])
         return discard
+    
+    def suggest_discard_by_ai(self, who, tiles, banned):
+        if banned:
+            tiles = [_ for _ in tiles if _ // 4 not in banned]
+        state = self.game.get_feature(who)
+        discard, conf = self.ai_agent.discard(state, tiles)
+        logging.debug(yellow(f"「{self.clients[who].username}」以置信度:{conf:.3f} 切出「{TENHOU_TILE_STRING_DICT[discard]}」"))
+        return discard, f"{conf:.3f}"
 
     def print_agari_info(self, who, from_who, action):
         han = action['han']
@@ -971,6 +980,12 @@ class GameEnvironment(object):
         message = {'event': 'select_tile', 'tiles': tiles, 'banned': banned, 'tsumo': tsumo, 'riichi': riichi, 'is_riichi_tile': is_riichi_tile}
         self.send_observers(who, message)
         if client.is_human():
+            if self.suggest:
+                if tiles == 'all':
+                    tiles = list(self.agents[who].tiles)
+                tile_id, conf = self.suggest_discard_by_ai(who, tiles, banned)
+                sugg_msg = {'event': 'suggest', 'tile_id': tile_id, 'tile_name': TENHOU_TILE_STRING_DICT[tile_id], 'score': conf}
+                self.send_personal(client, sugg_msg)
             self.send_personal(client, message)
             tile_id = self.fetch_discard_message(who, client, tiles, banned)
         else:
@@ -1160,7 +1175,7 @@ class GameEnvironment(object):
 
 
 class Server:
-    def __init__(self, host, port, AI_count, min_score, fast, allow_observe, train=False):
+    def __init__(self, host, port, AI_count, min_score, fast, allow_observe, train=False, suggest=False):
         self.server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         self.server_socket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
         self.server_socket.bind((host, port))
@@ -1172,7 +1187,7 @@ class Server:
         AI_count = 4 if train else AI_count  # 训练模式下必须4个AI
         self.AI_count = AI_count
         self.train = train
-        self.game = GameEnvironment(has_aka=True, AI_count=AI_count, min_score=min_score, fast=fast, allow_observe=allow_observe, train=train)
+        self.game = GameEnvironment(has_aka=True, AI_count=AI_count, min_score=min_score, fast=fast, allow_observe=allow_observe, train=train, suggest=suggest)
         logging.info(red(f"Server running at {host}:{port} with {self.AI_count} AI..."))
 
     def close_server(self, signum, frame):
@@ -1343,10 +1358,11 @@ if __name__ == '__main__':
     args.add_argument('--debug', '-d', action='store_true', help='Print more details')
     args.add_argument('--fast', '-f', action='store_true', help='Cancel AI thinking time')
     args.add_argument('--train', '-t', action='store_true', help='Collect playing data')
+    args.add_argument('--suggest', '-s', action='store_true', help='Suggest the best action for player')
     args = args.parse_args()
     if args.debug:
         logging.basicConfig(level=logging.DEBUG)
     else:
         logging.basicConfig(level=logging.INFO)
-    server = Server(args.host, args.port, args.AI, args.min_score, args.fast, args.allow_observe, args.train)
+    server = Server(args.host, args.port, args.AI, args.min_score, args.fast, args.allow_observe, args.train, args.suggest)
     asyncio.run(server.run())

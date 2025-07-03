@@ -456,6 +456,7 @@ function handleSelectTile(message) {
         let banned = message['banned'];
         let tiles = message['tiles'];
         let isRiichi = message['is_riichi_tile'];
+        let suggest = message['suggest'];
         if (tiles === 'all') {
             tiles = gameObj.tiles;
         } else {
@@ -561,6 +562,12 @@ function handleMessage(message) {
             break
         case 'settlement':
             handleSettlement(message);
+            break
+        case 'suggest':
+            const tileId = message['tile_id'];
+            const tileName = message['tile_name'];
+            const score = message['score'];
+            alert(`AI建议切出牌: ${tileName} (ID: ${tileId}), 置信度: ${score}`);
             break
         case 'select_tile':
             handleSelectTile(message);

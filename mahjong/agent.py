@@ -322,7 +322,7 @@ class AiAgent(object):
 
     def load_discard_model(self, model_path):
         if os.path.isfile(model_path):
-            params = torch.load(model_path, map_location=self.device)
+            params = torch.load(model_path, map_location=self.device, weights_only=False)
             state_dict = params['state_dict']
             num_layers = params['num_layers']
             in_channels = params['in_channels']
@@ -334,7 +334,7 @@ class AiAgent(object):
 
     def load_riichi_model(self, model_path):
         if os.path.isfile(model_path):
-            params = torch.load(model_path, map_location=self.device)
+            params = torch.load(model_path, map_location=self.device, weights_only=False)
             state_dict = params['state_dict']
             num_layers = params['num_layers']
             in_channels = params['in_channels']
@@ -347,7 +347,7 @@ class AiAgent(object):
 
     def load_chi_model(self, model_path):
         if os.path.isfile(model_path):
-            params = torch.load(model_path, map_location=self.device)
+            params = torch.load(model_path, map_location=self.device, weights_only=False)
             state_dict = params['state_dict']
             num_layers = params['num_layers']
             in_channels = params['in_channels']
@@ -360,7 +360,7 @@ class AiAgent(object):
 
     def load_pon_model(self, model_path):
         if os.path.isfile(model_path):
-            params = torch.load(model_path, map_location=self.device)
+            params = torch.load(model_path, map_location=self.device, weights_only=False)
             state_dict = params['state_dict']
             num_layers = params['num_layers']
             in_channels = params['in_channels']
@@ -373,7 +373,7 @@ class AiAgent(object):
 
     def load_kan_model(self, model_path):
         if os.path.isfile(model_path):
-            params = torch.load(model_path, map_location=self.device)
+            params = torch.load(model_path, map_location=self.device, weights_only=False)
             state_dict = params['state_dict']
             num_layers = params['num_layers']
             in_channels = params['in_channels']
