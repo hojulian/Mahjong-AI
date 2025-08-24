@@ -302,12 +302,14 @@ class GameEnvironment(object):
                 continue
 
     def fetch_decision_message(self, client: Client, actions, after_tsumo):
+        who = self.clients.index(client)
         if client.is_human():
+            if self.suggest:
+                self.decision_by_ai(who, actions, after_tsumo)
             message = client.fetch_message()
             logging.debug(yellow(f"fetch message from queue: {message}"))
             if 'action' in message:
                 return message['action']
-        who = self.clients.index(client)
         return self.decision_by_ai(who, actions, after_tsumo)
 
     def fetch_discard_message(self, who, client: Client, tiles, banned):
