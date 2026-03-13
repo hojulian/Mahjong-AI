@@ -23,7 +23,7 @@ def ptn(a):
                 t1 = copy.deepcopy(a)
                 t1.pop(i)
                 t1.pop(j - 1)
-                if len(a[i]) + len(a[i]) < 9:
+                if len(a[i]) + len(a[j]) < 9:
                     ret += ptn([a[i] + [0] + a[j]] + t1)
                     ret += ptn([a[j] + [0] + a[i]] + t1)
                 for k in range(len(a[i] + a[j]) + 1):
