@@ -4,9 +4,11 @@ requests
 torch
 torchvision
 tqdm
-wandb
+tensorboard
 termcolor
 matplotlib
 scikit-learn
 quart
 websockify
+kfp
+kfp-kubernetes

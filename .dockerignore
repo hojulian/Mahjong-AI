@@ -1,0 +1,11 @@
+data/
+output/
+logs/
+wandb/
+model/saved/
+__pycache__/
+**/__pycache__/
+*.pyc
+*.pyo
+.git/
+.claude/

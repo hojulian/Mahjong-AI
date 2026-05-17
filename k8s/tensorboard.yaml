@@ -1,0 +1,7 @@
+apiVersion: tensorboard.kubeflow.org/v1alpha1
+kind: Tensorboard
+metadata:
+  name: mahjong-tensorboard
+  namespace: julian-juho-ooo
+spec:
+  logspath: pvc://output-pvc/logs
