@@ -97,14 +97,16 @@ root:
               componentInputParameter: epochs
             log_dir:
               runtimeValue:
-                constant: /output/logs/chi
+                constant: /output/logs/{{$.inputs.parameters['pipelinechannel--mode']}}
             mode:
               componentInputParameter: mode
             num_layers:
               componentInputParameter: num_layers
             output_dir:
               runtimeValue:
-                constant: /output/checkpoints/chi
+                constant: /output/checkpoints/{{$.inputs.parameters['pipelinechannel--mode']}}
+            pipelinechannel--mode:
+              componentInputParameter: mode
             pos_weight:
               componentInputParameter: pos_weight
         taskInfo:
@@ -135,6 +137,11 @@ platforms:
     deploymentSpec:
       executors:
         exec-train-furo:
+          emptyDirMounts:
+          - medium: Memory
+            mountPath: /dev/shm
+            sizeLimit: 8Gi
+            volumeName: dshm
           imagePullSecret:
           - secretName: harbor-creds
             secretNameParameter:

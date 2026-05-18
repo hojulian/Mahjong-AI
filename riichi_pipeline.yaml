@@ -1,13 +1,12 @@
 # PIPELINE DEFINITION
-# Name: mahjong-furo-training
+# Name: mahjong-riichi-training
 # Inputs:
 #    epochs: int [Default: 10.0]
-#    mode: str [Default: 'chi']
 #    num_layers: int [Default: 20.0]
 #    pos_weight: int [Default: 0.0]
 components:
-  comp-train-furo:
-    executorLabel: exec-train-furo
+  comp-train-riichi:
+    executorLabel: exec-train-riichi
     inputDefinitions:
       parameters:
         data_dir:
@@ -17,10 +16,6 @@ components:
           isOptional: true
           parameterType: NUMBER_INTEGER
         log_dir:
-          parameterType: STRING
-        mode:
-          defaultValue: chi
-          isOptional: true
           parameterType: STRING
         num_layers:
           defaultValue: 20.0
@@ -34,13 +29,13 @@ components:
           parameterType: NUMBER_INTEGER
 deploymentSpec:
   executors:
-    exec-train-furo:
+    exec-train-riichi:
       container:
         args:
         - --executor_input
         - '{{$}}'
         - --function_to_execute
-        - train_furo
+        - train_riichi
         command:
         - sh
         - -c
@@ -60,15 +55,14 @@ deploymentSpec:
 
           '
         - "\nimport kfp\nfrom kfp import dsl\nfrom kfp.dsl import *\nfrom typing import\
-          \ *\n\ndef train_furo(\n    data_dir: str,\n    output_dir: str,\n    log_dir:\
-          \ str,\n    mode: str = 'chi',\n    num_layers: int = 20,\n    epochs: int\
-          \ = 10,\n    pos_weight: int = 0,\n):\n    import subprocess, sys\n    cmd\
-          \ = [\n        sys.executable, '/app/sl_train/train_furo_model.py',\n  \
-          \      '--mode', mode,\n        '--num_layers', str(num_layers),\n     \
-          \   '--epochs', str(epochs),\n        '--data-dir', data_dir,\n        '--output-dir',\
-          \ output_dir,\n        '--log-dir', log_dir,\n    ]\n    if pos_weight >\
-          \ 0:\n        cmd += ['--pos_weight', str(pos_weight)]\n    subprocess.run(cmd,\
-          \ check=True)\n\n"
+          \ *\n\ndef train_riichi(\n    data_dir: str,\n    output_dir: str,\n   \
+          \ log_dir: str,\n    num_layers: int = 20,\n    epochs: int = 10,\n    pos_weight:\
+          \ int = 0,\n):\n    import subprocess, sys\n    cmd = [\n        sys.executable,\
+          \ '/app/sl_train/train_riichi_model.py',\n        '--num_layers', str(num_layers),\n\
+          \        '--epochs', str(epochs),\n        '--data-dir', data_dir,\n   \
+          \     '--output-dir', output_dir,\n        '--log-dir', log_dir,\n    ]\n\
+          \    if pos_weight > 0:\n        cmd += ['--pos_weight', str(pos_weight)]\n\
+          \    subprocess.run(cmd, check=True)\n\n"
         image: harbor.macaroni-tet.ts.net/mahjong-ai/training:latest
         resources:
           accelerator:
@@ -79,15 +73,15 @@ deploymentSpec:
           resourceCpuRequest: '4'
           resourceMemoryRequest: 16Gi
 pipelineInfo:
-  name: mahjong-furo-training
+  name: mahjong-riichi-training
 root:
   dag:
     tasks:
-      train-furo:
+      train-riichi:
         cachingOptions:
           enableCache: true
         componentRef:
-          name: comp-train-furo
+          name: comp-train-riichi
         inputs:
           parameters:
             data_dir:
@@ -97,28 +91,22 @@ root:
               componentInputParameter: epochs
             log_dir:
               runtimeValue:
-                constant: /output/logs/chi
-            mode:
-              componentInputParameter: mode
+                constant: /output/logs/riichi
             num_layers:
               componentInputParameter: num_layers
             output_dir:
               runtimeValue:
-                constant: /output/checkpoints/chi
+                constant: /output/checkpoints/riichi
             pos_weight:
               componentInputParameter: pos_weight
         taskInfo:
-          name: train-furo
+          name: train-riichi
   inputDefinitions:
     parameters:
       epochs:
         defaultValue: 10.0
         isOptional: true
         parameterType: NUMBER_INTEGER
-      mode:
-        defaultValue: chi
-        isOptional: true
-        parameterType: STRING
       num_layers:
         defaultValue: 20.0
         isOptional: true
@@ -134,7 +122,12 @@ platforms:
   kubernetes:
     deploymentSpec:
       executors:
-        exec-train-furo:
+        exec-train-riichi:
+          emptyDirMounts:
+          - medium: Memory
+            mountPath: /dev/shm
+            sizeLimit: 8Gi
+            volumeName: dshm
           imagePullSecret:
           - secretName: harbor-creds
             secretNameParameter:
