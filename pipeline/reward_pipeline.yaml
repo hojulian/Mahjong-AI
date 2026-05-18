@@ -64,6 +64,9 @@ deploymentSpec:
           \ output_dir,\n        '--log-dir', log_dir,\n    ], check=True)\n\n"
         image: harbor.macaroni-tet.ts.net/mahjong-ai/training:latest
         resources:
+          accelerator:
+            count: '1'
+            resourceCount: '1'
           cpuRequest: 4.0
           memoryRequest: 17.179869184
           resourceCpuRequest: '4'

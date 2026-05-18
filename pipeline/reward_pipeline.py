@@ -24,6 +24,7 @@ def reward_pipeline(
     )
     task.set_cpu_request('4')
     task.set_memory_request('16Gi')
+    task.set_gpu_limit('1')
     kubernetes.mount_pvc(task, pvc_name=DATA_PVC, mount_path='/data')
     kubernetes.mount_pvc(task, pvc_name=OUTPUT_PVC, mount_path='/output')
     kubernetes.set_image_pull_secrets(task, [IMAGE_PULL_SECRET])
