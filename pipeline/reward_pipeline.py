@@ -6,8 +6,6 @@ from pipeline.components import train_reward
 DATA_PVC = 'data-pvc'
 OUTPUT_PVC = 'output-pvc'
 IMAGE_PULL_SECRET = 'harbor-creds'
-
-
 @dsl.pipeline(name='mahjong-reward-training')
 def reward_pipeline(
     hidden_dims: int = 50,
@@ -28,6 +26,7 @@ def reward_pipeline(
     kubernetes.mount_pvc(task, pvc_name=DATA_PVC, mount_path='/data')
     kubernetes.mount_pvc(task, pvc_name=OUTPUT_PVC, mount_path='/output')
     kubernetes.set_image_pull_secrets(task, [IMAGE_PULL_SECRET])
+    kubernetes.empty_dir_mount(task, volume_name='dshm', mount_path='/dev/shm', medium='Memory', size_limit='8Gi')
 
 
 if __name__ == '__main__':
